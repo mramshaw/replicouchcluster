@@ -24,6 +24,11 @@ So, that's the following platforms:
 * Google GKE
 * Microsoft AKS
 
+This exercise follows on from my [Replicated Cassandra Database](http://github.com/mramshaw/Kubernetes/tree/master/Replicated%20Cassandra%20Database)
+exercise.
+
+For an example of accessing Couchbase with Golang, see my [RESTful-Couchbase](http://github.com/mramshaw/RESTful-Couchbase) repo.
+
 ## Contents
 
 The contents are as follows:
@@ -35,11 +40,14 @@ The contents are as follows:
     * [Increase minikube's processors](#increase-minikubes-processors)
     * [Restart minikube](#restart-minikube)
     * [Verify minikube's config](#verify-minikubes-config)
-* [Startup](#startup)
 * [Testing](#testing)
+    * [Namespace](#namespace)
 * [Teardown](#teardown)
 * [Reference](#reference)
+    * [Kubernetes namespaces](#kubernetes-namespaces)
+    * [Couchbase Operator Architecture](#couchbase-operator-architecture)
     * [Guidelines and Best Practices](#guidelines-and-best-practices)
+    * [Creating TLS Certificates](#creating-tls-certificates)
 * [Versions](#versions)
 * [To Do](#to-do)
 * [Credits](#credits)
@@ -63,7 +71,7 @@ In this document we will use the first option (minikube).
 
 The following steps may not be absolutely necessary, but will probably save time and aggravation.
 
-Couchbase is a ___beast___, so we should incease minikube's limits.
+Couchbase is a ___beast___, so first we should increase minikube's limits.
 
 #### Increase minikube's working memory
 
@@ -110,9 +118,9 @@ $ minikube delete && minikube start
 $
 ```
 
-#### Verify minikube config
+#### Verify minikube's config
 
-Verify minikube config as follows:
+Verify minikube's config as follows:
 
 ```bash
 $ minikube config view
@@ -121,21 +129,64 @@ $ minikube config view
 $
 ```
 
-## Startup
-
 ## Testing
 
+#### Namespace
+
+Create a namespace as follows:
+
+```bash
+$ kubectl create namespace couchbase
+namespace/couchbase created
+$
+```
+
+This will enable us to more clearly follow what is happening in the Kubernetes console:
+
+```bash
+$ kubectl get namespace
+NAME              STATUS   AGE
+couchbase         Active   2m18s
+default           Active   4m50s
+kube-node-lease   Active   4m51s
+kube-public       Active   4m51s
+kube-system       Active   4m51s
+$
+```
+
+[We will be able to subset upon the `couchbase` namespace with either `kubectl` or the
+ Kubernetes console.]
+
 ## Teardown
+
+Delete the namespace as follows:
+
+```bash
+$ kubectl delete namespace couchbase
+namespace/couchbase deleted
+$
+```
 
 Finally, stop minikube:
 
 ```bash
 $ minikube stop
+✋  Stopping node "minikube"  ...
+🛑  1 nodes stopped.
+$
 ```
 
 ## Reference
 
 Some useful references follow.
+
+#### Kubernetes namespaces
+
+    http://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+
+#### Couchbase Operator Architecture
+
+    http://docs.couchbase.com/operator/current/concept-operator.html
 
 #### Guidelines and Best Practices
 
@@ -143,15 +194,20 @@ Some useful references follow.
 
 [Reading this is a __must__, it covers many useful things.]
 
+#### Creating TLS Certificates
+
+    http://docs.couchbase.com/operator/current/tutorial-tls.html
+
 ## Versions
 
 * Docker __19.03.8__
 * kubectl (Client: __v1.19.3__, Server: __v1.19.2__)
 * kubernetes __v1.19.2__
-* minikube __v1.14.2__
+* minikube __v1.15.0__
 
 ## To Do
 
+- [ ] Fix Kubernetes warnings
 - [ ] Investigate deploying [Couchbase on Amazon EKS](https://blog.couchbase.com/deploy-self-healing-highly-available-couchbase-cluster-on-kubernetes-using-persistent-volumes/)
 
 ## Credits
@@ -159,11 +215,20 @@ Some useful references follow.
 Sadly, internet content often expires. So I generally like to include all needed files into my repos,
 so as to guard against losing access to some needed reource. Even so, I always like to give credit.
 
-The following links refer to the original sources for files included in this repo.
+The following links refer to the original sources for files included in this repo (kudos to author
+Ram Dhakne for making them available).
 
 YAML files and binaries:
 
     http://packages.couchbase.com/kubernetes/1.2.0/couchbase-autonomous-operator-kubernetes_1.2.0-macos-x86_64.zip
+
+X509 Help:
+
+    http://github.com/ramdhakne/blogs/blob/master/external-connectivity/x509-help.txt
+
+Minikube YAML:
+
+    http://raw.githubusercontent.com/ramdhakne/blogs/master/minikube/couchbase-persistent-cluster-tls-k8s-minikube.yaml
 
 App pod YAML:
 
